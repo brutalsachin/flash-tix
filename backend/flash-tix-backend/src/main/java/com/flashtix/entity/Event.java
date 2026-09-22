@@ -1,7 +1,6 @@
 package com.flashtix.entity;
 
 import jakarta.persistence.*;
-
 import java.time.LocalDateTime;
 
 @Entity
@@ -10,12 +9,20 @@ public class Event {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
+
+    @ManyToOne
+    @JoinColumn(name = "venue_id", nullable = false)
+    private Venue venue;
+
+    @ManyToOne
+    @JoinColumn(name = "organizer_id", nullable = false)
+    private User organizer;
 
     @Column(nullable = false)
     private String name;
 
-    @Column(nullable = false,columnDefinition = "TEXT")
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String description;
 
     @Column(nullable = false)
@@ -36,9 +43,8 @@ public class Event {
     public Event() {
     }
 
-    public Event(long id, String description, String name, LocalDateTime endDate,
+    public Event(String description, String name, LocalDateTime endDate,
                  LocalDateTime startDate, Integer capacity, String status, String category) {
-        this.id = id;
         this.description = description;
         this.name = name;
         this.endDate = endDate;
@@ -48,12 +54,24 @@ public class Event {
         this.category = category;
     }
 
-    public long getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(long id) {
-        this.id = id;
+    public Venue getVenue() {
+        return venue;
+    }
+
+    public void setVenue(Venue venue) {
+        this.venue = venue;
+    }
+
+    public User getOrganizer() {
+        return organizer;
+    }
+
+    public void setOrganizer(User organizer) {
+        this.organizer = organizer;
     }
 
     public String getName() {
@@ -112,5 +130,3 @@ public class Event {
         this.status = status;
     }
 }
-
-
