@@ -2,6 +2,7 @@ package com.flashtix.controller;
 
 
 import com.flashtix.dto.RegisterRequest;
+import com.flashtix.dto.UserResponse;
 import com.flashtix.entity.User;
 import com.flashtix.service.AuthService;
 import jakarta.validation.Valid;
@@ -21,8 +22,15 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<User> register(@Valid @RequestBody RegisterRequest request) {
+    public ResponseEntity<UserResponse> register(@Valid @RequestBody RegisterRequest request) {
         User savedUser = authService.register(request);
-        return ResponseEntity.ok(savedUser);
+        UserResponse response = new UserResponse(
+                savedUser.getId(),
+                savedUser.getName(),
+                savedUser.getEmail(),
+                savedUser.getRole()
+        );
+        return ResponseEntity.ok(response);
+
     }
 }
