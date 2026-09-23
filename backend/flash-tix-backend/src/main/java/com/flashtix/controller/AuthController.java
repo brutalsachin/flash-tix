@@ -1,6 +1,7 @@
 package com.flashtix.controller;
 
 
+import com.flashtix.dto.LoginRequest;
 import com.flashtix.dto.RegisterRequest;
 import com.flashtix.dto.UserResponse;
 import com.flashtix.entity.User;
@@ -32,5 +33,10 @@ public class AuthController {
         );
         return ResponseEntity.ok(response);
 
+    }
+    @PostMapping("/login")
+    public ResponseEntity<String> login(@Valid @RequestBody LoginRequest request) {
+        String token = authService.login(request);
+        return ResponseEntity.ok(token);
     }
 }
