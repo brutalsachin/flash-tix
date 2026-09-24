@@ -22,6 +22,7 @@ public class Event {
     @Column(nullable = false)
     private String name;
 
+
     @Column(nullable = false, columnDefinition = "TEXT")
     private String description;
 
