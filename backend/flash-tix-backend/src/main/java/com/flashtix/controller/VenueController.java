@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/v1/venues")
 public class VenueController {
-
+//For Venues
     private final VenueService venueService;
 
     public VenueController(VenueService venueService) {
