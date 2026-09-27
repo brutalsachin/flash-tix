@@ -20,13 +20,12 @@ public class Booking {
     private Seat seat;
 
     @Column(nullable = false)
-    private String status; // CONFIRMED, CANCELLED
+    private String status;
 
     @Column(nullable = false)
     private LocalDateTime createdAt;
 
-    public Booking() {
-    }
+    public Booking() {}
 
     public Booking(User user, Seat seat, String status) {
         this.user = user;
@@ -39,6 +38,5 @@ public class Booking {
     public User getUser() { return user; }
     public Seat getSeat() { return seat; }
     public String getStatus() { return status; }
-    public void setStatus(String status) { this.status = status; }
     public LocalDateTime getCreatedAt() { return createdAt; }
 }
