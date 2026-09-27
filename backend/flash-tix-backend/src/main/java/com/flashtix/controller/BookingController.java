@@ -27,6 +27,6 @@ public class BookingController {
         BookingResponse response = new BookingResponse(
                 booking.getId(), booking.getSeat().getSeatNumber(), booking.getStatus()
         );
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(response);// now support idempotency - same user - multiple request
     }
 }
