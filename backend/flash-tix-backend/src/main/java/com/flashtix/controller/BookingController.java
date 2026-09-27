@@ -18,9 +18,11 @@ public class BookingController {
     }
 
     @PostMapping("/{seatId}")
-    public ResponseEntity<BookingResponse> bookSeat(@PathVariable Long seatId) {
+    public ResponseEntity<BookingResponse> bookSeat(
+            @PathVariable Long seatId,
+            @RequestHeader(value = "Idempotency-Key", required = false) String idempotencyKey) {
         Long userId = (Long) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        Booking booking = bookingService.bookSeat(seatId, userId);
+        Booking booking = bookingService.bookSeat(seatId, userId, idempotencyKey);
 
         BookingResponse response = new BookingResponse(
                 booking.getId(), booking.getSeat().getSeatNumber(), booking.getStatus()
