@@ -39,4 +39,7 @@ public class Booking {
     public Seat getSeat() { return seat; }
     public String getStatus() { return status; }
     public LocalDateTime getCreatedAt() { return createdAt; }
+    public void setStatus(String status) {
+        this.status = status;
+    }
 }

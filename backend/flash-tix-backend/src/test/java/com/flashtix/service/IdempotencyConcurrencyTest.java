@@ -94,7 +94,7 @@ public class IdempotencyConcurrencyTest {
             executor.submit(() -> {
                 try {
                     startGate.await();
-                    Booking booking = bookingService.bookSeat(seatId, userId, idempotencyKey);
+                    Booking booking = bookingService.holdSeat(seatId, userId, idempotencyKey);
                     resultingBookingIds.add(booking.getId());
                     successCount.incrementAndGet();
                 } catch (Exception e) {

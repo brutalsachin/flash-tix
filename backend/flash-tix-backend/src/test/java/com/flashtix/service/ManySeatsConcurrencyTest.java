@@ -102,7 +102,7 @@ public class ManySeatsConcurrencyTest {
             executor.submit(() -> {
                 try {
                     startGate.await();
-                    bookingService.bookSeat(targetSeatId, userId, null);
+                    bookingService.holdSeat(targetSeatId, userId, null);
                     successCount.incrementAndGet();
                 } catch (Exception e) {
                     failureCount.incrementAndGet();
