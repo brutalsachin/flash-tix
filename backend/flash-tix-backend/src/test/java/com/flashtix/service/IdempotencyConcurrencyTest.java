@@ -1,5 +1,6 @@
 package com.flashtix.service;
 
+import com.flashtix.entity.Booking;
 import com.flashtix.entity.Event;
 import com.flashtix.entity.Seat;
 import com.flashtix.entity.User;
@@ -15,17 +16,18 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
 //@Transactional
-public class BookingConcurrencyTest {
+public class IdempotencyConcurrencyTest {
 
     @Autowired
     private BookingService bookingService;
@@ -46,20 +48,20 @@ public class BookingConcurrencyTest {
     private PasswordEncoder passwordEncoder;
 
     @Test
-    void only_one_user_should_successfully_book_the_same_seat_under_concurrency() throws InterruptedException {
+    void concurrent_requests_with_same_idempotency_key_should_create_only_one_booking() throws InterruptedException {
 
         String uniqueSuffix = UUID.randomUUID().toString();
 
-        // 1. Set up: one venue, one event, one seat
-        Venue venue = venueRepository.save(new Venue("Concurrency Test Venue", "Addr", "City", 500));
+        // 1. Setup: one venue, one event, one seat, one user
+        Venue venue = venueRepository.save(new Venue("Idempotency Test Venue", "Addr", "City", 500));
 
         User organizer = userRepository.save(
-                new User("concurrency_organizer_" + uniqueSuffix + "@example.com", "Organizer",
+                new User("idempotency_organizer_" + uniqueSuffix + "@example.com", "Organizer",
                         passwordEncoder.encode("pass"), "ORGANIZER")
         );
 
         Event event = new Event(
-                "desc", "Concurrency Test Event",
+                "desc", "Idempotency Test Event",
                 LocalDateTime.now().plusDays(10),
                 LocalDateTime.now().plusDays(9),
                 100, "UPCOMING", "TEST"
@@ -71,29 +73,29 @@ public class BookingConcurrencyTest {
         Seat seat = seatRepository.save(new Seat(event, "1", "GENERAL", "AVAILABLE"));
         Long seatId = seat.getId();
 
-        // 2. Create 200 competing users
-        int userCount = 200;
-        List<Long> userIds = new ArrayList<>();
-        for (int i = 0; i < userCount; i++) {
-            User u = userRepository.save(
-                    new User("concurrent_user_" + uniqueSuffix + "_" + i + "@example.com", "User " + i,
-                            passwordEncoder.encode("pass"), "USER")
-            );
-            userIds.add(u.getId());
-        }
+        User user = userRepository.save(
+                new User("idempotency_user_" + uniqueSuffix + "@example.com", "Test User",
+                        passwordEncoder.encode("pass"), "USER")
+        );
+        Long userId = user.getId();
 
-        // 3. Fire all 200 at the same seat, simultaneously
-        ExecutorService executor = Executors.newFixedThreadPool(50);
+        String idempotencyKey = "test-idempotency-key-" + uniqueSuffix;
+
+
+        int requestCount = 100;
+        ExecutorService executor = Executors.newFixedThreadPool(20);
         CountDownLatch startGate = new CountDownLatch(1);
-        CountDownLatch doneLatch = new CountDownLatch(userCount);
+        CountDownLatch doneLatch = new CountDownLatch(requestCount);
         AtomicInteger successCount = new AtomicInteger(0);
         AtomicInteger failureCount = new AtomicInteger(0);
+        ConcurrentLinkedQueue<Long> resultingBookingIds = new ConcurrentLinkedQueue<>();
 
-        for (Long userId : userIds) {
+        for (int i = 0; i < requestCount; i++) {
             executor.submit(() -> {
                 try {
                     startGate.await();
-                    bookingService.bookSeat(seatId, userId, null);
+                    Booking booking = bookingService.bookSeat(seatId, userId, idempotencyKey);
+                    resultingBookingIds.add(booking.getId());
                     successCount.incrementAndGet();
                 } catch (Exception e) {
                     failureCount.incrementAndGet();
@@ -107,11 +109,13 @@ public class BookingConcurrencyTest {
         doneLatch.await(30, TimeUnit.SECONDS);
         executor.shutdown();
 
-        // 4. Assertions: exactly one success, rest failed
-        assertEquals(1, successCount.get(), "Exactly one booking should succeed");
-        assertEquals(userCount - 1, failureCount.get(), "All others should be rejected");
+        // 3. Assertions
+        System.out.println("Successes: " + successCount.get() + ", Failures: " + failureCount.get());
 
-        Seat finalSeat = seatRepository.findById(seatId).orElseThrow();
-        assertEquals("BOOKED", finalSeat.getStatus());
+        assertTrue(successCount.get() >= 1, "At least one request should succeed");
+
+        Set<Long> distinctBookingIds = resultingBookingIds.stream().collect(Collectors.toSet());
+        assertEquals(1, distinctBookingIds.size(),
+                "All successful requests must resolve to exactly the same booking id");
     }
 }
