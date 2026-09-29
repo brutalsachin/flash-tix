@@ -30,8 +30,14 @@ public class EventRequest {
     @NotBlank
     private String category;
 
-    @NotNull
-    private Long venueId;
+    @NotBlank
+    private String venueName;
+
+    @NotBlank
+    private String address;
+
+    @NotBlank
+    private String city;
 
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
@@ -51,6 +57,12 @@ public class EventRequest {
     public String getCategory() { return category; }
     public void setCategory(String category) { this.category = category; }
 
-    public Long getVenueId() { return venueId; }
-    public void setVenueId(Long venueId) { this.venueId = venueId; }
+    public String getVenueName() { return venueName; }
+    public void setVenueName(String venueName) { this.venueName = venueName; }
+
+    public String getAddress() { return address; }
+    public void setAddress(String address) { this.address = address; }
+
+    public String getCity() { return city; }
+    public void setCity(String city) { this.city = city; }
 }

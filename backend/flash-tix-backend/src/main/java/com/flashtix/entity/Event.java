@@ -64,13 +64,7 @@ public class Event {
         return id;
     }
 
-    public Venue getVenue() {
-        return venue;
-    }
 
-    public void setVenue(Venue venue) {
-        this.venue = venue;
-    }
 
     public User getOrganizer() {
         return organizer;
