@@ -3,10 +3,8 @@ package com.flashtix.service;
 import com.flashtix.dto.EventRequest;
 import com.flashtix.entity.Event;
 import com.flashtix.entity.User;
-import com.flashtix.entity.Venue;
 import com.flashtix.repository.EventRepository;
 import com.flashtix.repository.UserRepository;
-import com.flashtix.repository.VenueRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -15,12 +13,12 @@ import java.util.List;
 public class EventService {
 
     private final EventRepository eventRepository;
-    private final VenueRepository venueRepository;
+    //private final VenueRepository venueRepository;
     private final UserRepository userRepository;
 
-    public EventService(EventRepository eventRepository, VenueRepository venueRepository, UserRepository userRepository) {
+    public EventService(EventRepository eventRepository, UserRepository userRepository) {
         this.eventRepository = eventRepository;
-        this.venueRepository = venueRepository;
+        //this.venueRepository = venueRepository;
         this.userRepository = userRepository;
     }
 

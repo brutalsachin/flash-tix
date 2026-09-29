@@ -3,16 +3,13 @@ package com.flashtix.service;
 import com.flashtix.entity.Event;
 import com.flashtix.entity.Seat;
 import com.flashtix.entity.User;
-import com.flashtix.entity.Venue;
 import com.flashtix.repository.EventRepository;
 import com.flashtix.repository.SeatRepository;
 import com.flashtix.repository.UserRepository;
-import com.flashtix.repository.VenueRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
