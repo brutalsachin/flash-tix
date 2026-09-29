@@ -1,0 +1,139 @@
+[1mdiff --git a/backend/flash-tix-backend/src/main/java/com/flashtix/entity/Event.java b/backend/flash-tix-backend/src/main/java/com/flashtix/entity/Event.java[m
+[1mindex 2ac1a87..124b7d1 100644[m
+[1m--- a/backend/flash-tix-backend/src/main/java/com/flashtix/entity/Event.java[m
+[1m+++ b/backend/flash-tix-backend/src/main/java/com/flashtix/entity/Event.java[m
+[36m@@ -36,9 +36,9 @@[m [mpublic class Event {[m
+     public Event() {[m
+     }[m
+ [m
+[31m-    public Event(long id, String description, String name, LocalDateTime endDate,[m
+[32m+[m[32m    public Event( String description, String name, LocalDateTime endDate,[m
+                  LocalDateTime startDate, Integer capacity, String status, String category) {[m
+[31m-        this.id = id;[m
+[32m+[m[32m       // this.id = id;[m
+         this.description = description;[m
+         this.name = name;[m
+         this.endDate = endDate;[m
+[36m@@ -52,9 +52,9 @@[m [mpublic class Event {[m
+         return id;[m
+     }[m
+ [m
+[31m-    public void setId(long id) {[m
+[31m-        this.id = id;[m
+[31m-    }[m
+[32m+[m[32m//    public void setId(long id) {[m
+[32m+[m[32m//        this.id = id;[m
+[32m+[m[32m//    }[m
+ [m
+     public String getName() {[m
+         return name;[m
+[1mdiff --git a/backend/flash-tix-backend/src/main/java/com/flashtix/entity/User.java b/backend/flash-tix-backend/src/main/java/com/flashtix/entity/User.java[m
+[1mindex 3436eb1..c114d2a 100644[m
+[1m--- a/backend/flash-tix-backend/src/main/java/com/flashtix/entity/User.java[m
+[1m+++ b/backend/flash-tix-backend/src/main/java/com/flashtix/entity/User.java[m
+[36m@@ -26,9 +26,9 @@[m [mpublic class User {[m
+ [m
+     }[m
+ [m
+[31m-    public User(String email, long id, String name, String password, String role) {[m
+[32m+[m[32m    public User(String email, String name, String password, String role) {[m
+         this.email = email;[m
+[31m-        this.id = id;[m
+[32m+[m[32m       // this.id = id;[m
+         this.name = name;[m
+         this.password = password;[m
+         this.role = role;[m
+[36m@@ -38,9 +38,9 @@[m [mpublic class User {[m
+         return id;[m
+     }[m
+ [m
+[31m-    public void setId(long id) {[m
+[31m-        this.id = id;[m
+[31m-    }[m
+[32m+[m[32m//    public void setId(long id) {[m
+[32m+[m[32m//        this.id = id;[m
+[32m+[m[32m//    }[m
+ [m
+     public String getName() {[m
+         return name;[m
+[1mdiff --git a/backend/flash-tix-backend/src/main/java/com/flashtix/entity/Venue.java b/backend/flash-tix-backend/src/main/java/com/flashtix/entity/Venue.java[m
+[1mindex 03a5c53..49cc7f5 100644[m
+[1m--- a/backend/flash-tix-backend/src/main/java/com/flashtix/entity/Venue.java[m
+[1m+++ b/backend/flash-tix-backend/src/main/java/com/flashtix/entity/Venue.java[m
+[36m@@ -1,4 +1,74 @@[m
+ package com.flashtix.entity;[m
+ [m
+[32m+[m[32mimport jakarta.persistence.*;[m
+[32m+[m
+[32m+[m[32m@Entity[m
+[32m+[m[32m@Table(name = "venues")[m
+ public class Venue {[m
+[31m-}[m
+[32m+[m
+[32m+[m[32m    @Id[m
+[32m+[m[32m    @GeneratedValue(strategy = GenerationType.IDENTITY)[m
+[32m+[m[32m    private Long id;[m
+[32m+[m
+[32m+[m[32m    @Column(nullable = false)[m
+[32m+[m[32m    private String name;[m
+[32m+[m
+[32m+[m[32m    @Column(nullable = false)[m
+[32m+[m[32m    private String address;[m
+[32m+[m
+[32m+[m[32m    @Column(nullable = false)[m
+[32m+[m[32m    private String city;[m
+[32m+[m
+[32m+[m[32m    @Column(nullable = false)[m
+[32m+[m[32m    private Integer capacity;[m
+[32m+[m
+[32m+[m[32m    public Venue() {[m
+[32m+[m[32m    }[m
+[32m+[m
+[32m+[m[32m    public Venue(String name, String address, String city, Integer capacity) {[m
+[32m+[m[32m        this.name = name;[m
+[32m+[m[32m        this.address = address;[m
+[32m+[m[32m        this.city = city;[m
+[32m+[m[32m        this.capacity = capacity;[m
+[32m+[m[32m    }[m
+[32m+[m
+[32m+[m[32m    public Long getId() {[m
+[32m+[m[32m        return id;[m
+[32m+[m[32m    }[m
+[32m+[m
+[32m+[m[32m//    public void setId(Long id) {[m
+[32m+[m[32m//        this.id = id;[m
+[32m+[m[32m//    }[m
+[32m+[m
+[32m+[m[32m    public String getName() {[m
+[32m+[m[32m        return name;[m
+[32m+[m[32m    }[m
+[32m+[m
+[32m+[m[32m    public void setName(String name) {[m
+[32m+[m[32m        this.name = name;[m
+[32m+[m[32m    }[m
+[32m+[m
+[32m+[m[32m    public String getAddress() {[m
+[32m+[m[32m        return address;[m
+[32m+[m[32m    }[m
+[32m+[m
+[32m+[m[32m    public void setAddress(String address) {[m
+[32m+[m[32m        this.address = address;[m
+[32m+[m[32m    }[m
+[32m+[m
+[32m+[m[32m    public String getCity() {[m
+[32m+[m[32m        return city;[m
+[32m+[m[32m    }[m
+[32m+[m
+[32m+[m[32m    public void setCity(String city) {[m
+[32m+[m[32m        this.city = city;[m
+[32m+[m[32m    }[m
+[32m+[m
+[32m+[m[32m    public Integer getCapacity() {[m
+[32m+[m[32m        return capacity;[m
+[32m+[m[32m    }[m
+[32m+[m
+[32m+[m[32m    public void setCapacity(Integer capacity) {[m
+[32m+[m[32m        this.capacity = capacity;[m
+[32m+[m[32m    }[m
+[32m+[m[32m}[m
+\ No newline at end of file[m
