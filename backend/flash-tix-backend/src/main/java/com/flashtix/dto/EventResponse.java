@@ -13,10 +13,12 @@ public class EventResponse {
     private final String category;
     private final String organizerName;
     private final String venueName;
+    private final String address;
+    private final String city;
 
     public EventResponse(Long id, String name, String description, LocalDateTime startDate,
                          LocalDateTime endDate, Integer capacity, String status, String category,
-                         String organizerName, String venueName) {
+                         String organizerName, String venueName, String address, String city) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -27,6 +29,8 @@ public class EventResponse {
         this.category = category;
         this.organizerName = organizerName;
         this.venueName = venueName;
+        this.address = address;
+        this.city = city;
     }
 
     public Long getId() { return id; }
@@ -39,4 +43,6 @@ public class EventResponse {
     public String getCategory() { return category; }
     public String getOrganizerName() { return organizerName; }
     public String getVenueName() { return venueName; }
+    public String getAddress() { return address; }
+    public String getCity() { return city; }
 }

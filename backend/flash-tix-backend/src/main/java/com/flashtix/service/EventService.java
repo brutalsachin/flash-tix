@@ -3,10 +3,8 @@ package com.flashtix.service;
 import com.flashtix.dto.EventRequest;
 import com.flashtix.entity.Event;
 import com.flashtix.entity.User;
-import com.flashtix.entity.Venue;
 import com.flashtix.repository.EventRepository;
 import com.flashtix.repository.UserRepository;
-import com.flashtix.repository.VenueRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -15,36 +13,26 @@ import java.util.List;
 public class EventService {
 
     private final EventRepository eventRepository;
-    private final VenueRepository venueRepository;
     private final UserRepository userRepository;
 
-    public EventService(EventRepository eventRepository, VenueRepository venueRepository, UserRepository userRepository) {
+    public EventService(EventRepository eventRepository, UserRepository userRepository) {
         this.eventRepository = eventRepository;
-        this.venueRepository = venueRepository;
         this.userRepository = userRepository;
     }
 
     public Event createEvent(EventRequest request, Long organizerId) {
-        Venue venue = venueRepository.findById(request.getVenueId())
-                .orElseThrow(() -> new IllegalArgumentException("Venue not found"));
 
-        List<Event> existingEvents = eventRepository.findByVenueId(request.getVenueId());
+        List<Event> existingEvents = eventRepository.findByVenueNameAndAddress(
+                request.getVenueName(), request.getAddress());
 
         for (Event existing : existingEvents) {
             boolean overlaps = request.getStartDate().isBefore(existing.getEndDate())
                     && request.getEndDate().isAfter(existing.getStartDate());
             if (overlaps) {
                 throw new IllegalArgumentException(
-                        "Venue is already booked for another event during this time: " + existing.getName()
+                        "This venue is already booked for another event during this time: " + existing.getName()
                 );
             }
-        }
-
-        if (request.getCapacity() > venue.getCapacity()) {
-            throw new IllegalArgumentException(
-                    "Event capacity (" + request.getCapacity() +
-                            ") cannot exceed venue capacity (" + venue.getCapacity() + ")"
-            );
         }
 
         User organizer = userRepository.findById(organizerId)
@@ -59,11 +47,14 @@ public class EventService {
                 "UPCOMING",
                 request.getCategory()
         );
-        event.setVenue(venue);
+        event.setVenueName(request.getVenueName());
+        event.setAddress(request.getAddress());
+        event.setCity(request.getCity());
         event.setOrganizer(organizer);
 
         return eventRepository.save(event);
     }
+
     public Event updateEvent(Long eventId, EventRequest request, Long organizerId) {
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new IllegalArgumentException("Event not found"));
@@ -72,10 +63,8 @@ public class EventService {
             throw new IllegalArgumentException("You are not authorized to update this event");
         }
 
-        Venue venue = venueRepository.findById(request.getVenueId())
-                .orElseThrow(() -> new IllegalArgumentException("Venue not found"));
-
-        List<Event> existingEvents = eventRepository.findByVenueId(request.getVenueId());
+        List<Event> existingEvents = eventRepository.findByVenueNameAndAddress(
+                request.getVenueName(), request.getAddress());
 
         for (Event existing : existingEvents) {
             if (existing.getId().equals(eventId)) {
@@ -85,16 +74,9 @@ public class EventService {
                     && request.getEndDate().isAfter(existing.getStartDate());
             if (overlaps) {
                 throw new IllegalArgumentException(
-                        "Venue is already booked for another event during this time: " + existing.getName()
+                        "This venue is already booked for another event during this time: " + existing.getName()
                 );
             }
-        }
-
-        if (request.getCapacity() > venue.getCapacity()) {
-            throw new IllegalArgumentException(
-                    "Event capacity (" + request.getCapacity() +
-                            ") cannot exceed venue capacity (" + venue.getCapacity() + ")"
-            );
         }
 
         event.setName(request.getName());
@@ -103,10 +85,13 @@ public class EventService {
         event.setEndDate(request.getEndDate());
         event.setCapacity(request.getCapacity());
         event.setCategory(request.getCategory());
-        event.setVenue(venue);
+        event.setVenueName(request.getVenueName());
+        event.setAddress(request.getAddress());
+        event.setCity(request.getCity());
 
         return eventRepository.save(event);
     }
+
     public List<Event> getAllEvents() {
         return eventRepository.findAll();
     }

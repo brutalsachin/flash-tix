@@ -23,7 +23,6 @@ class BookingServiceTest {
     @Autowired private BookingRepository bookingRepository;
     @Autowired private SeatRepository seatRepository;
     @Autowired private EventRepository eventRepository;
-    @Autowired private VenueRepository venueRepository;
     @Autowired private UserRepository userRepository;
 
     @MockitoBean private PaymentService paymentService;
@@ -39,10 +38,11 @@ class BookingServiceTest {
         buyer = userRepository.save(new User("buyer_" + s + "@t.com", "Buyer", "pw", "USER"));
         otherBuyer = userRepository.save(new User("other_" + s + "@t.com", "Other", "pw", "USER"));
 
-        Venue venue = venueRepository.save(new Venue("Test Arena", "Addr", "City", 500));
         Event event = new Event("desc", "Concert", LocalDateTime.now().plusDays(10),
                 LocalDateTime.now().plusDays(9), 100, "UPCOMING", "TEST");
-        event.setVenue(venue);
+        event.setVenueName("Test Arena");
+        event.setAddress("Addr");
+        event.setCity("City");
         event.setOrganizer(organizer);
         event = eventRepository.save(event);
 

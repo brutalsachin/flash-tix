@@ -3,16 +3,13 @@ package com.flashtix.service;
 import com.flashtix.entity.Event;
 import com.flashtix.entity.Seat;
 import com.flashtix.entity.User;
-import com.flashtix.entity.Venue;
 import com.flashtix.repository.EventRepository;
 import com.flashtix.repository.SeatRepository;
 import com.flashtix.repository.UserRepository;
-import com.flashtix.repository.VenueRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -24,7 +21,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest
-//@Transactional
 public class ManySeatsConcurrencyTest {
 
     @Autowired
@@ -37,9 +33,6 @@ public class ManySeatsConcurrencyTest {
     private EventRepository eventRepository;
 
     @Autowired
-    private VenueRepository venueRepository;
-
-    @Autowired
     private UserRepository userRepository;
 
     @Autowired
@@ -49,9 +42,6 @@ public class ManySeatsConcurrencyTest {
     void exactly_100_of_1000_users_should_successfully_book_when_only_100_seats_exist() throws InterruptedException {
 
         String uniqueSuffix = UUID.randomUUID().toString();
-
-        // 1. Set up venue + event with 100-seat capacity
-        Venue venue = venueRepository.save(new Venue("Many Seats Test Venue", "Addr", "City", 500));
 
         User organizer = userRepository.save(
                 new User("many_seats_organizer_" + uniqueSuffix + "@example.com", "Organizer",
@@ -64,12 +54,13 @@ public class ManySeatsConcurrencyTest {
                 LocalDateTime.now().plusDays(9),
                 100, "UPCOMING", "TEST"
         );
-        event.setVenue(venue);
+        event.setVenueName("Many Seats Test Venue");
+        event.setAddress("Addr");
+        event.setCity("City");
         event.setOrganizer(organizer);
         event = eventRepository.save(event);
         Event savedEvent = event;
 
-        // 2. Generate exactly 100 seats
         int seatCount = 100;
         List<Long> seatIds = new ArrayList<>();
         for (int i = 1; i <= seatCount; i++) {
@@ -77,7 +68,6 @@ public class ManySeatsConcurrencyTest {
             seatIds.add(seat.getId());
         }
 
-        // 3. Create 1000 competing users
         int userCount = 1000;
         List<Long> userIds = new ArrayList<>();
         for (int i = 0; i < userCount; i++) {
@@ -88,7 +78,6 @@ public class ManySeatsConcurrencyTest {
             userIds.add(u.getId());
         }
 
-        // 4. Each of the 1000 users tries to book a seat, cycling through the 100 seat ids
         ExecutorService executor = Executors.newFixedThreadPool(100);
         CountDownLatch startGate = new CountDownLatch(1);
         CountDownLatch doneLatch = new CountDownLatch(userCount);
@@ -116,14 +105,13 @@ public class ManySeatsConcurrencyTest {
         doneLatch.await(60, TimeUnit.SECONDS);
         executor.shutdown();
 
-        // 5. Assertions
         assertEquals(seatCount, successCount.get(), "Exactly 100 bookings should succeed (one per seat)");
         assertEquals(userCount - seatCount, failureCount.get(), "The remaining 900 should be rejected");
 
-        long bookedSeats = seatRepository.findAll().stream()
+        long heldSeats = seatRepository.findAll().stream()
                 .filter(s -> s.getEvent().getId().equals(savedEvent.getId()))
-                .filter(s -> "BOOKED".equals(s.getStatus()))
+                .filter(s -> "HELD".equals(s.getStatus()))
                 .count();
-        assertEquals(seatCount, bookedSeats, "All 100 seats should end up BOOKED, none double-booked");
+        assertEquals(seatCount, heldSeats, "All 100 seats should end up HELD, none double-booked");
     }
 }

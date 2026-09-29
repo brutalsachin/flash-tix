@@ -11,9 +11,6 @@ public class Event {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "venue_id", nullable = false)
-    private Venue venue;
 
     @ManyToOne
     @JoinColumn(name = "organizer_id", nullable = false)
@@ -40,6 +37,14 @@ public class Event {
 
     @Column(nullable = false)
     private String category;
+    @Column(nullable = false)
+    private String venueName;
+
+    @Column(nullable = false)
+    private String address;
+
+    @Column(nullable = false)
+    private String city;
 
     public Event() {
     }
@@ -59,13 +64,7 @@ public class Event {
         return id;
     }
 
-    public Venue getVenue() {
-        return venue;
-    }
 
-    public void setVenue(Venue venue) {
-        this.venue = venue;
-    }
 
     public User getOrganizer() {
         return organizer;
@@ -130,4 +129,13 @@ public class Event {
     public void setStatus(String status) {
         this.status = status;
     }
+
+
+    public String getVenueName() { return venueName; }
+    public void setVenueName(String venueName) { this.venueName = venueName; }
+    public String getAddress() { return address; }
+    public void setAddress(String address) { this.address = address; }
+    public String getCity() { return city; }
+    public void setCity(String city) { this.city = city; }
+
 }
