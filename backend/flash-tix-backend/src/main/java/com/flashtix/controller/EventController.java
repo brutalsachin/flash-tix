@@ -25,58 +25,20 @@ public class EventController {
     public ResponseEntity<EventResponse> createEvent(@Valid @RequestBody EventRequest request) {
         Long organizerId = (Long) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Event event = eventService.createEvent(request, organizerId);
-
-        EventResponse response = new EventResponse(
-                event.getId(),
-                event.getName(),
-                event.getDescription(),
-                event.getStartDate(),
-                event.getEndDate(),
-                event.getCapacity(),
-                event.getStatus(),
-                event.getCategory(),
-                event.getOrganizer().getName(),
-                event.getVenue().getName()
-        );
-
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(toResponse(event));
     }
+
     @PutMapping("/{id}")
     public ResponseEntity<EventResponse> updateEvent(@PathVariable Long id, @Valid @RequestBody EventRequest request) {
         Long organizerId = (Long) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Event event = eventService.updateEvent(id, request, organizerId);
-
-        EventResponse response = new EventResponse(
-                event.getId(),
-                event.getName(),
-                event.getDescription(),
-                event.getStartDate(),
-                event.getEndDate(),
-                event.getCapacity(),
-                event.getStatus(),
-                event.getCategory(),
-                event.getOrganizer().getName(),
-                event.getVenue().getName()
-        );
-
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(toResponse(event));
     }
+
     @GetMapping
     public ResponseEntity<List<EventResponse>> getAllEvents() {
-        List<Event> events = eventService.getAllEvents();
-        List<EventResponse> response = events.stream()
-                .map(event -> new EventResponse(
-                        event.getId(),
-                        event.getName(),
-                        event.getDescription(),
-                        event.getStartDate(),
-                        event.getEndDate(),
-                        event.getCapacity(),
-                        event.getStatus(),
-                        event.getCategory(),
-                        event.getOrganizer().getName(),
-                        event.getVenue().getName()
-                ))
+        List<EventResponse> response = eventService.getAllEvents().stream()
+                .map(this::toResponse)
                 .toList();
         return ResponseEntity.ok(response);
     }
@@ -84,7 +46,11 @@ public class EventController {
     @GetMapping("/{id}")
     public ResponseEntity<EventResponse> getEventById(@PathVariable Long id) {
         Event event = eventService.getEventById(id);
-        EventResponse response = new EventResponse(
+        return ResponseEntity.ok(toResponse(event));
+    }
+
+    private EventResponse toResponse(Event event) {
+        return new EventResponse(
                 event.getId(),
                 event.getName(),
                 event.getDescription(),
@@ -94,8 +60,9 @@ public class EventController {
                 event.getStatus(),
                 event.getCategory(),
                 event.getOrganizer().getName(),
-                event.getVenue().getName()
+                event.getVenueName(),
+                event.getAddress(),
+                event.getCity()
         );
-        return ResponseEntity.ok(response);
     }
 }

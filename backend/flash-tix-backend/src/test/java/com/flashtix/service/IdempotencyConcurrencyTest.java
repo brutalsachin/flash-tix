@@ -23,7 +23,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
-//@Transactional
 public class IdempotencyConcurrencyTest {
 
     @Autowired
@@ -36,9 +35,6 @@ public class IdempotencyConcurrencyTest {
     private EventRepository eventRepository;
 
     @Autowired
-    private VenueRepository venueRepository;
-
-    @Autowired
     private UserRepository userRepository;
 
     @Autowired
@@ -48,9 +44,6 @@ public class IdempotencyConcurrencyTest {
     void concurrent_requests_with_same_idempotency_key_should_create_only_one_booking() throws InterruptedException {
 
         String uniqueSuffix = UUID.randomUUID().toString();
-
-        // 1. Setup: one venue, one event, one seat, one user
-        Venue venue = venueRepository.save(new Venue("Idempotency Test Venue", "Addr", "City", 500));
 
         User organizer = userRepository.save(
                 new User("idempotency_organizer_" + uniqueSuffix + "@example.com", "Organizer",
@@ -63,7 +56,9 @@ public class IdempotencyConcurrencyTest {
                 LocalDateTime.now().plusDays(9),
                 100, "UPCOMING", "TEST"
         );
-        event.setVenue(venue);
+        event.setVenueName("Idempotency Test Venue");
+        event.setAddress("Addr");
+        event.setCity("City");
         event.setOrganizer(organizer);
         event = eventRepository.save(event);
 
@@ -77,7 +72,6 @@ public class IdempotencyConcurrencyTest {
         Long userId = user.getId();
 
         String idempotencyKey = "test-idempotency-key-" + uniqueSuffix;
-
 
         int requestCount = 100;
         ExecutorService executor = Executors.newFixedThreadPool(20);
@@ -106,7 +100,6 @@ public class IdempotencyConcurrencyTest {
         doneLatch.await(30, TimeUnit.SECONDS);
         executor.shutdown();
 
-        // 3. Assertions
         System.out.println("Successes: " + successCount.get() + ", Failures: " + failureCount.get());
 
         assertTrue(successCount.get() >= 1, "At least one request should succeed");
